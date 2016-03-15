@@ -7,6 +7,10 @@ See requirements.org (plain-text) for a description of the project.
 
 Make a shared state Websockets drawing program
 
+Sources:
+Referenced in class demo during completion of assignment
+https://github.com/abramhindle/WebSocketsExamples
+
 Prereqs
 =======
 

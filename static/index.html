@@ -47,15 +47,25 @@ world = {};
 //XXX: TODO Make this prettier!
 function drawCircle(context,entity) {
     with(context) {
-        beginPath();                
+        beginPath();              
         lineWidth = 3;
         var x = entity["x"];
         var y = entity["y"];
         //moveTo(x,y);
-        fillStyle = entity["colour"];
+        // Apply radial gradient to fill
+        var gradient = createRadialGradient(x, y, 0, x, y, entity["radius"]);
+        gradient.addColorStop(0, "white");
+        gradient.addColorStop(1, entity["colour"]);
+        fillStyle = gradient;
         strokeStyle = fillStyle;
-        arc(x, y, (entity["radius"])?entity["radius"]:50, 0, 2.0 * Math.PI, false);  
-        stroke();                                
+        arc(x, y, (entity["radius"])?entity["radius"]:50, 0, 2.0 * Math.PI, false);
+        if (entity["colour"] == "red" || entity["colour"] == "blue") {
+            globalAlpha = 0.5;
+        } else {
+            globalAlpha = 1.0;
+        }
+        stroke();                              
+        fill();                               
     }
 }
 
@@ -125,6 +135,10 @@ function addEntity(entity, data) {
     world[entity] = data;
     drawNextFrame(); // (but should we?)
     //XXX: Send a XHTML Request that updates the entity you just modified!
+
+    dict = {};
+    dict[entity] = data;
+    socket.send(JSON.stringify(dict))
 }
 var counter = 0;
 function addEntityWithoutName(data) {
@@ -261,7 +275,15 @@ function wsSetup() {
     socket.onmessage = function(msg) {  
         try {
             debug("WebSocket Recv:" + msg.data);
-            //XXX: TODO What are you going to do here?            
+            //XXX: TODO What are you going to do here?
+            var message = JSON.parse(msg.data);
+
+            // Update world
+            for (var key in message) {
+                world[key] = message[key];
+            }
+
+            drawNextFrame()            
         } catch (e) {
             alert("socket on message: " + e);
         }
